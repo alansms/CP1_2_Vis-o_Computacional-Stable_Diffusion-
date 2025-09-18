@@ -307,7 +307,7 @@ function showResults(videoUrl) {
     } else {
         // Production mode - show actual video or image
         if (videoUrl.startsWith('data:image/')) {
-            // If it's an image, show it as an image instead of video
+            // If it's an image, create an animated version with CSS
             const imageContainer = document.createElement('div');
             imageContainer.className = 'image-container';
             imageContainer.style.cssText = `
@@ -329,10 +329,74 @@ function showResults(videoUrl) {
                 height: auto;
                 border-radius: 8px;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                animation: imageMovement 3s ease-in-out infinite alternate;
             `;
             
+            // Add CSS animation for movement based on selected version
+            const style = document.createElement('style');
+            const version = selectedVersion || 'version1';
+            
+            if (version === 'version1') {
+                // Version 1: Continuidade + Movimento Progressivo
+                style.textContent = `
+                    @keyframes imageMovement {
+                        0% {
+                            transform: scale(1) rotate(0deg) translateX(0px);
+                            filter: brightness(1) contrast(1) hue-rotate(0deg);
+                        }
+                        25% {
+                            transform: scale(1.02) rotate(0.3deg) translateX(2px);
+                            filter: brightness(1.05) contrast(1.02) hue-rotate(2deg);
+                        }
+                        50% {
+                            transform: scale(1.05) rotate(0deg) translateX(0px);
+                            filter: brightness(1.1) contrast(1.05) hue-rotate(0deg);
+                        }
+                        75% {
+                            transform: scale(1.02) rotate(-0.3deg) translateX(-2px);
+                            filter: brightness(1.05) contrast(1.02) hue-rotate(-2deg);
+                        }
+                        100% {
+                            transform: scale(1) rotate(0deg) translateX(0px);
+                            filter: brightness(1) contrast(1) hue-rotate(0deg);
+                        }
+                    }
+                `;
+            } else {
+                // Version 2: Interpolação Avançada
+                style.textContent = `
+                    @keyframes imageMovement {
+                        0% {
+                            transform: scale(1) rotate(0deg) translateX(0px) translateY(0px);
+                            filter: brightness(1) contrast(1) hue-rotate(0deg) saturate(1);
+                        }
+                        20% {
+                            transform: scale(1.08) rotate(1deg) translateX(3px) translateY(-1px);
+                            filter: brightness(1.15) contrast(1.08) hue-rotate(5deg) saturate(1.1);
+                        }
+                        40% {
+                            transform: scale(1.12) rotate(0deg) translateX(0px) translateY(-2px);
+                            filter: brightness(1.25) contrast(1.12) hue-rotate(0deg) saturate(1.2);
+                        }
+                        60% {
+                            transform: scale(1.08) rotate(-1deg) translateX(-3px) translateY(-1px);
+                            filter: brightness(1.15) contrast(1.08) hue-rotate(-5deg) saturate(1.1);
+                        }
+                        80% {
+                            transform: scale(1.05) rotate(0.5deg) translateX(1px) translateY(1px);
+                            filter: brightness(1.08) contrast(1.05) hue-rotate(2deg) saturate(1.05);
+                        }
+                        100% {
+                            transform: scale(1) rotate(0deg) translateX(0px) translateY(0px);
+                            filter: brightness(1) contrast(1) hue-rotate(0deg) saturate(1);
+                        }
+                    }
+                `;
+            }
+            document.head.appendChild(style);
+            
             const imageTitle = document.createElement('h3');
-            imageTitle.textContent = 'Imagem Gerada:';
+            imageTitle.textContent = 'Vídeo Gerado (Demo):';
             imageTitle.style.cssText = `
                 margin: 0 0 15px 0;
                 color: #2c3e50;
@@ -341,7 +405,7 @@ function showResults(videoUrl) {
             `;
             
             const imageInfo = document.createElement('p');
-            imageInfo.textContent = 'Demo mode: Sua imagem foi processada. Para vídeo real com movimento, use os notebooks Jupyter.';
+            imageInfo.textContent = 'Demo mode: Movimento simulado com CSS. Para vídeo real com Stable Diffusion, use os notebooks Jupyter.';
             imageInfo.style.cssText = `
                 margin: 10px 0 0 0;
                 color: #7f8c8d;
