@@ -54,19 +54,39 @@ exports.handler = async (event, context) => {
     // Simulate processing time
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // Return a sample video URL (you can replace this with your own)
-    const sampleVideoUrl = 'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4';
-
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({
-        success: true,
-        videoUrl: sampleVideoUrl,
-        demo: true,
-        message: 'Demo mode: Sample video returned. For full functionality, use the Jupyter notebooks locally.'
-      })
-    };
+    // Return local demo video
+    const demoVideoPath = path.join(__dirname, '../../demo_video.mp4');
+    
+    // Check if demo video exists
+    if (fs.existsSync(demoVideoPath)) {
+      const videoBuffer = fs.readFileSync(demoVideoPath);
+      const videoBase64 = videoBuffer.toString('base64');
+      
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          success: true,
+          videoUrl: `data:video/mp4;base64,${videoBase64}`,
+          demo: true,
+          message: 'Demo mode: Sample video returned. For full functionality, use the Jupyter notebooks locally.'
+        })
+      };
+    } else {
+      // Fallback to external URL
+      const sampleVideoUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+      
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          success: true,
+          videoUrl: sampleVideoUrl,
+          demo: true,
+          message: 'Demo mode: Sample video returned. For full functionality, use the Jupyter notebooks locally.'
+        })
+      };
+    }
 
   } catch (error) {
     console.error('Error in demo mode:', error);

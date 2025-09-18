@@ -225,7 +225,7 @@ async function callGenerationAPI(formData) {
             
             return {
                 success: true,
-                videoUrl: 'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4' // Demo video
+                videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' // Demo video
             };
         }
         
@@ -323,10 +323,41 @@ function downloadVideo() {
         return;
     }
     
-    const link = document.createElement('a');
-    link.href = generatedVideo.src;
-    link.download = `stable_diffusion_video_${Date.now()}.mp4`;
-    link.click();
+    try {
+        const videoSrc = generatedVideo.src;
+        
+        // Check if it's a base64 video
+        if (videoSrc.startsWith('data:video/mp4;base64,')) {
+            // Handle base64 video
+            const base64Data = videoSrc.split(',')[1];
+            const binaryData = atob(base64Data);
+            const bytes = new Uint8Array(binaryData.length);
+            
+            for (let i = 0; i < binaryData.length; i++) {
+                bytes[i] = binaryData.charCodeAt(i);
+            }
+            
+            const blob = new Blob([bytes], { type: 'video/mp4' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `stable_diffusion_video_${Date.now()}.mp4`;
+            link.click();
+            
+            // Clean up
+            URL.revokeObjectURL(url);
+        } else {
+            // Handle regular URL
+            const link = document.createElement('a');
+            link.href = videoSrc;
+            link.download = `stable_diffusion_video_${Date.now()}.mp4`;
+            link.click();
+        }
+    } catch (error) {
+        console.error('Download error:', error);
+        showNotification('❌ Erro ao baixar o vídeo. Tente novamente.', 'error');
+    }
 }
 
 // Utility Functions
