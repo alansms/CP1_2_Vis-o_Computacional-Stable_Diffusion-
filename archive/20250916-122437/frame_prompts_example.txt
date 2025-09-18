@@ -1,0 +1,13 @@
+# Exemplo de prompts para animação
+# Cada linha representa um prompt para um frame
+
+A cat sitting peacefully in a garden
+A cat stretching its paws in a garden
+A cat standing up in a garden
+A cat walking through the garden
+A cat running through the garden
+A cat jumping over flowers in the garden
+A cat playing with butterflies in the garden
+A cat resting under a tree in the garden
+A cat looking at birds in the garden
+A cat sleeping peacefully in the garden

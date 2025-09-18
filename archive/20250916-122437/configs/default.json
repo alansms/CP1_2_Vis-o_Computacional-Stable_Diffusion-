@@ -1,0 +1,15 @@
+{
+  "model_id": "runwayml/stable-diffusion-v1-5",
+  "use_openvino": true,
+  "width": 512,
+  "height": 512,
+  "steps": 20,
+  "guidance": 7.5,
+  "strength": 0.7,
+  "fps": 24,
+  "quality": 8,
+  "method": "imageio",
+  "frames_dir": "frames",
+  "output_dir": "output",
+  "temp_dir": "temp"
+}

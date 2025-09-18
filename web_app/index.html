@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 Stable Diffusion Video Generator</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🎬 Stable Diffusion Video Generator</h1>
+            <p>Arraste uma imagem e gere um vídeo com movimento real usando IA</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Version Selection -->
+            <div class="version-selector">
+                <h3>Escolha a versão:</h3>
+                <div class="version-buttons">
+                    <button id="version1" class="version-btn active">
+                        <i class="fas fa-play"></i>
+                        Versão 1: Continuidade + Movimento
+                    </button>
+                    <button id="version2" class="version-btn">
+                        <i class="fas fa-magic"></i>
+                        Versão 2: Interpolação Avançada
+                    </button>
+                </div>
+            </div>
+
+            <!-- Upload Area -->
+            <div class="upload-container">
+                <div id="dropZone" class="drop-zone">
+                    <div class="drop-content">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>Arraste e solte sua imagem aqui</h3>
+                        <p>ou clique para selecionar</p>
+                        <input type="file" id="fileInput" accept="image/*" hidden>
+                    </div>
+                </div>
+                
+                <!-- Preview -->
+                <div id="preview" class="preview-container" style="display: none;">
+                    <img id="previewImage" src="" alt="Preview">
+                    <button id="removeImage" class="remove-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Settings -->
+            <div class="settings-panel">
+                <h3>Configurações</h3>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label for="frames">Número de Frames:</label>
+                        <input type="range" id="frames" min="4" max="12" value="8">
+                        <span id="framesValue">8</span>
+                    </div>
+                    <div class="setting-item">
+                        <label for="fps">FPS:</label>
+                        <input type="range" id="fps" min="8" max="24" value="12">
+                        <span id="fpsValue">12</span>
+                    </div>
+                    <div class="setting-item">
+                        <label for="quality">Qualidade:</label>
+                        <select id="quality">
+                            <option value="fast">Rápida (256x256)</option>
+                            <option value="balanced" selected>Balanceada (512x512)</option>
+                            <option value="high">Alta (768x768)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generate Button -->
+            <button id="generateBtn" class="generate-btn" disabled>
+                <i class="fas fa-video"></i>
+                Gerar Vídeo
+            </button>
+
+            <!-- Progress -->
+            <div id="progress" class="progress-container" style="display: none;">
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill"></div>
+                </div>
+                <p id="progressText">Preparando...</p>
+            </div>
+
+            <!-- Results -->
+            <div id="results" class="results-container" style="display: none;">
+                <h3>Vídeo Gerado:</h3>
+                <video id="generatedVideo" controls>
+                    Seu navegador não suporta vídeos.
+                </video>
+                <div class="download-section">
+                    <button id="downloadBtn" class="download-btn">
+                        <i class="fas fa-download"></i>
+                        Baixar Vídeo
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Powered by Stable Diffusion & Netlify</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

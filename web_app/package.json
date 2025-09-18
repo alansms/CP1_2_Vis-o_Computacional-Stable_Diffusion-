@@ -1,0 +1,26 @@
+{
+  "name": "stable-diffusion-video-generator",
+  "version": "1.0.0",
+  "description": "Interface web para geração de vídeos com Stable Diffusion",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python -m http.server 8000",
+    "build": "echo 'Static site - no build needed'",
+    "deploy": "netlify deploy --prod"
+  },
+  "keywords": [
+    "stable-diffusion",
+    "video-generation",
+    "ai",
+    "machine-learning",
+    "netlify"
+  ],
+  "author": "Stable Diffusion Video Generator",
+  "license": "MIT",
+  "devDependencies": {
+    "netlify-cli": "^15.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}
