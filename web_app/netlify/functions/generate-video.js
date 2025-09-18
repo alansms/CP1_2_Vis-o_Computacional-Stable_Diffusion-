@@ -53,7 +53,8 @@ exports.handler = async (event, context) => {
     // Simulate processing time
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // Create a simple video using the uploaded image
+    // Create a simple video by duplicating the uploaded image
+    // This approach works without external dependencies
     const tempDir = `/tmp/sd_video_${Date.now()}`;
     await execAsync(`mkdir -p ${tempDir}`);
 
@@ -62,14 +63,21 @@ exports.handler = async (event, context) => {
     const imageBuffer = Buffer.from(image.split(',')[1], 'base64');
     fs.writeFileSync(imagePath, imageBuffer);
 
-    // Create a simple video by duplicating the image
+    // Create multiple copies of the image to simulate frames
+    const numFrames = parseInt(frames) || 8;
+    const frames = [];
+    
+    for (let i = 0; i < numFrames; i++) {
+      const framePath = `${tempDir}/frame_${i.toString().padStart(3, '0')}.png`;
+      fs.copyFileSync(imagePath, framePath);
+      frames.push(framePath);
+    }
+
+    // Try to create video with FFmpeg (if available)
     const outputPath = `${tempDir}/output.mp4`;
     
-    // Use ffmpeg to create a video from the image with some animation
-    const duration = 3; // 3 seconds
-    const ffmpegCommand = `ffmpeg -loop 1 -i "${imagePath}" -c:v libx264 -t ${duration} -pix_fmt yuv420p -vf "scale=512:512,zoompan=z='min(zoom+0.0015,1.5)':d=${duration*25}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':fps=25" "${outputPath}" -y`;
-    
     try {
+      const ffmpegCommand = `ffmpeg -framerate ${fps || 12} -i "${tempDir}/frame_%03d.png" -c:v libx264 -pix_fmt yuv420p "${outputPath}" -y`;
       await execAsync(ffmpegCommand);
       
       // Read the generated video
@@ -86,67 +94,28 @@ exports.handler = async (event, context) => {
           success: true,
           videoUrl: `data:video/mp4;base64,${videoBase64}`,
           demo: true,
-          message: 'Demo mode: Video created from your uploaded image with zoom effect. For full Stable Diffusion processing, use the Jupyter notebooks locally.'
+          message: 'Demo mode: Video created from your uploaded image. For full Stable Diffusion processing, use the Jupyter notebooks locally.'
         })
       };
     } catch (ffmpegError) {
-      console.error('FFmpeg zoom error:', ffmpegError);
+      console.error('FFmpeg error:', ffmpegError);
       
-      // Try simpler version without zoom
-      try {
-        const simpleCommand = `ffmpeg -loop 1 -i "${imagePath}" -c:v libx264 -t 3 -pix_fmt yuv420p -vf "scale=512:512" "${outputPath}" -y`;
-        await execAsync(simpleCommand);
-        
-        const videoBuffer = fs.readFileSync(outputPath);
-        const videoBase64 = videoBuffer.toString('base64');
-        
-        await execAsync(`rm -rf ${tempDir}`);
-        
-        return {
-          statusCode: 200,
-          headers,
-          body: JSON.stringify({
-            success: true,
-            videoUrl: `data:video/mp4;base64,${videoBase64}`,
-            demo: true,
-            message: 'Demo mode: Video created from your uploaded image. For full Stable Diffusion processing, use the Jupyter notebooks locally.'
-          })
-        };
-      } catch (simpleError) {
-        console.error('FFmpeg simple error:', simpleError);
+      // Fallback: Return the original image as a "video"
+      // This ensures the user sees their uploaded image
+      const imageBase64 = imageBuffer.toString('base64');
       
-      // Fallback to sample video if ffmpeg fails
-      const demoVideoPath = path.join(__dirname, '../../demo_video.mp4');
+      await execAsync(`rm -rf ${tempDir}`);
       
-      if (fs.existsSync(demoVideoPath)) {
-        const videoBuffer = fs.readFileSync(demoVideoPath);
-        const videoBase64 = videoBuffer.toString('base64');
-        
-        return {
-          statusCode: 200,
-          headers,
-          body: JSON.stringify({
-            success: true,
-            videoUrl: `data:video/mp4;base64,${videoBase64}`,
-            demo: true,
-            message: 'Demo mode: Fallback video returned. For full functionality, use the Jupyter notebooks locally.'
-          })
-        };
-      } else {
-        // Final fallback to external URL
-        const sampleVideoUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
-        
-        return {
-          statusCode: 200,
-          headers,
-          body: JSON.stringify({
-            success: true,
-            videoUrl: sampleVideoUrl,
-            demo: true,
-            message: 'Demo mode: External video returned. For full functionality, use the Jupyter notebooks locally.'
-          })
-        };
-      }
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          success: true,
+          videoUrl: `data:image/png;base64,${imageBase64}`,
+          demo: true,
+          message: 'Demo mode: Your uploaded image returned. For full Stable Diffusion processing, use the Jupyter notebooks locally.'
+        })
+      };
     }
 
   } catch (error) {
