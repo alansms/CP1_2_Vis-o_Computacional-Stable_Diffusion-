@@ -305,8 +305,62 @@ function showResults(videoUrl) {
         // Re-attach download button event
         document.getElementById('downloadBtn').addEventListener('click', downloadVideo);
     } else {
-        // Production mode - show actual video
-        generatedVideo.src = videoUrl;
+        // Production mode - show actual video or image
+        if (videoUrl.startsWith('data:image/')) {
+            // If it's an image, show it as an image instead of video
+            const imageContainer = document.createElement('div');
+            imageContainer.className = 'image-container';
+            imageContainer.style.cssText = `
+                width: 100%;
+                max-width: 512px;
+                margin: 0 auto;
+                text-align: center;
+                background: #f8f9fa;
+                border-radius: 12px;
+                padding: 20px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            `;
+            
+            const image = document.createElement('img');
+            image.src = videoUrl;
+            image.style.cssText = `
+                width: 100%;
+                max-width: 512px;
+                height: auto;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            `;
+            
+            const imageTitle = document.createElement('h3');
+            imageTitle.textContent = 'Imagem Gerada:';
+            imageTitle.style.cssText = `
+                margin: 0 0 15px 0;
+                color: #2c3e50;
+                font-size: 18px;
+                font-weight: 600;
+            `;
+            
+            const imageInfo = document.createElement('p');
+            imageInfo.textContent = 'Demo mode: Sua imagem foi processada. Para vídeo real com movimento, use os notebooks Jupyter.';
+            imageInfo.style.cssText = `
+                margin: 10px 0 0 0;
+                color: #7f8c8d;
+                font-size: 14px;
+                font-style: italic;
+            `;
+            
+            imageContainer.appendChild(imageTitle);
+            imageContainer.appendChild(image);
+            imageContainer.appendChild(imageInfo);
+            
+            // Replace video with image container
+            const videoContainer = generatedVideo.parentElement;
+            videoContainer.innerHTML = '';
+            videoContainer.appendChild(imageContainer);
+        } else {
+            // If it's a video, show it normally
+            generatedVideo.src = videoUrl;
+        }
     }
     
     results.style.display = 'block';
@@ -324,6 +378,19 @@ function downloadVideo() {
     }
     
     try {
+        // Check if we have an image container instead of video
+        const imageContainer = document.querySelector('.image-container');
+        if (imageContainer) {
+            const image = imageContainer.querySelector('img');
+            if (image) {
+                const link = document.createElement('a');
+                link.href = image.src;
+                link.download = `stable_diffusion_image_${Date.now()}.png`;
+                link.click();
+                return;
+            }
+        }
+        
         const videoSrc = generatedVideo.src;
         
         // Check if it's a base64 video
@@ -347,6 +414,26 @@ function downloadVideo() {
             
             // Clean up
             URL.revokeObjectURL(url);
+        } else if (videoSrc.startsWith('data:image/')) {
+            // Handle base64 image
+            const base64Data = videoSrc.split(',')[1];
+            const binaryData = atob(base64Data);
+            const bytes = new Uint8Array(binaryData.length);
+            
+            for (let i = 0; i < binaryData.length; i++) {
+                bytes[i] = binaryData.charCodeAt(i);
+            }
+            
+            const blob = new Blob([bytes], { type: 'image/png' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `stable_diffusion_image_${Date.now()}.png`;
+            link.click();
+            
+            // Clean up
+            URL.revokeObjectURL(url);
         } else {
             // Handle regular URL
             const link = document.createElement('a');
@@ -356,7 +443,7 @@ function downloadVideo() {
         }
     } catch (error) {
         console.error('Download error:', error);
-        showNotification('❌ Erro ao baixar o vídeo. Tente novamente.', 'error');
+        showNotification('❌ Erro ao baixar o arquivo. Tente novamente.', 'error');
     }
 }
 
